@@ -7,8 +7,19 @@ import win32gui
 import win32api
 import psutil
 import argparse
+import ctypes
 
-target_names = []
+target_names = [
+    "windows_name1",
+    "windows_name2",
+    "windows_name3",
+    "windows_name4",
+    "windows_name5",
+    "windows_name6",
+    "windows_name7",
+    "windows_name8",
+    "windows_name9",
+]
 
 taskbar_size = 48  # options: 72, 48, 32
 
@@ -18,7 +29,9 @@ windows_per_col = 3
 
 
 def isRealWindow(hWnd):
-    """Return True iff given window is a real Windows application window."""
+    """
+    Return True iff given window is a real Windows application window.
+    """
     if not win32gui.IsWindowVisible(hWnd):
         return False
     if win32gui.GetParent(hWnd) != 0:
@@ -37,7 +50,6 @@ def getWindowSizes(targets: list = None):
     """
     Return a list of tuples (handler, (width, height)) for each real window.
     """
-
     def callback(hWnd, windows):
         process_name = win32gui.GetWindowText(hWnd)
         if not isRealWindow(hWnd):
@@ -66,13 +78,8 @@ def getWindowSizes(targets: list = None):
 
 def getScreenSize():
     """
-    from screeninfo import get_monitors
-
-    for m in get_monitors():
-        print(str(m))
+    Gets the total width and height of the screen.
     """
-    import ctypes
-
     user32 = ctypes.windll.user32
     screensize = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
     return screensize
@@ -116,8 +123,6 @@ def new_windows_size(
 def get_new_windows_positions(
     screen_size, windows_per_row, windows_per_col, new_window_size
 ):
-    # theoretical_total_windows_width, theoretical_total_window_height =
-
     screen_width, screen_height = screen_size[0], screen_size[1]
     windows_width_total, windows_height_total = (
         windows_per_row * new_window_size[0],
@@ -195,5 +200,9 @@ def main():
 
 
 if __name__ == "__main__":
+    # it sometimes needs to be repositioned 3 times for optimal positioning.
+    # if multiple monitors are used and the windows are in the wrong monitor, the first run moves them to the correct monitor.
+    # the second run positions them in roughly the right places.
+    # the third run finetunes positioning.
     for i in range(3):
         main()
